@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Загрузка изображений</title>
+    <style>
+        .images {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .images img {
+            margin-right: 10px;
+            margin-bottom: 10px;
+            width: 100px;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+
+<label for="pageInput">Номер страницы:</label>
+<input type="number" id="pageInput" placeholder="1-10">
+<label for="limitInput">Лимит:</label>
+<input type="number" id="limitInput" placeholder="1-10">
+<button id="fetchButton">Запрос</button>
+<div id="message"></div>
+<div class="images" id="images"></div>
+
+<script>
+    function fetchImages(page, limit) {
+        fetch('https://picsum.photos/v2/list?page=' + page + '&limit=' + limit)
+            .then(response => response.json())
+            .then(data => {
+                const imagesContainer = document.getElementById('images');
+                imagesContainer.innerHTML = '';
+                data.forEach(image => {
+                    const img = document.createElement('img');
+                    img.src = image.download_url;
+                    img.alt = 'Image';
+                    imagesContainer.appendChild(img);
+                });
+                localStorage.setItem('lastImages', JSON.stringify(data));
+            })
+            .catch(error => {
+                document.getElementById('message').textContent = 'Ошибка при загрузке изображений: ' + error;
+            });
+    }
+
+    document.getElementById('fetchButton').addEventListener('click', () => {
+        const page = document.getElementById('pageInput').value;
+        const limit = document.getElementById('limitInput').value;
+        const messageElement = document.getElementById('message');
+
+        if (!page || page < 1 || page > 10) {
+            messageElement.textContent = 'Номер страницы вне диапазона от 1 до 10';
+        } else if (!limit || limit < 1 || limit > 10) {
+            messageElement.textContent = 'Лимит вне диапазона от 1 до 10';
+        } else if ((!page || page < 1 || page > 10) && (!limit || limit < 1 || limit > 10)) {
+            messageElement.textContent = 'Номер страницы и лимит вне диапазона от 1 до 10';
+        } else {
+            messageElement.textContent = '';
+            fetchImages(page, limit);
+        }
+    });
+
+    window.addEventListener('load', () => {
+        const lastImages = JSON.parse(localStorage.getItem('lastImages'));
+        if (lastImages) {
+            const imagesContainer = document.getElementById('images');
+            lastImages.forEach(image => {
+                const img = document.createElement('img');
+                img.src = image.download_url;
+                img.alt = 'Image';
+                imagesContainer.appendChild(img);
+            });
+        }
+    });
+</script>
+
+</body>
+</html>

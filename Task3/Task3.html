@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Загрузка изображений</title>
+<style>
+    .image-container {
+    display: flex;
+    flex-wrap: wrap;
+}
+    .image-container img {
+    margin: 5px;
+    max-width: 100px;
+    max-height: 100px;
+}
+</style>
+</head>
+<body>
+
+<input type="number" id="numberInput" placeholder="Введите число от 1 до 10">
+    <button id="loadButton">Загрузить изображения</button>
+    <div id="message"></div>
+    <div class="image-container" id="imageContainer"></div>
+
+    <script>
+        document.getElementById('loadButton').addEventListener('click', function() {
+        const value = document.querySelector('#numberInput').value;
+        const messageElement = document.getElementById('message');
+        const imageContainer = document.getElementById('imageContainer');
+
+        if (value < 1 || value > 10) {
+        messageElement.textContent = 'число вне диапазона от 1 до 10';
+        imageContainer.innerHTML = '';
+    } else {
+        messageElement.textContent = '';
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', 'https://picsum.photos/v2/list?limit=' + value);
+        xhr.responseType = 'json';
+        xhr.onload = function() {
+        if (xhr.status === 200) {
+        imageContainer.innerHTML = xhr.response.map(image =>
+        `<img src="${image.download_url}" alt="Random Image">`
+        ).join('');
+    } else {
+        messageElement.textContent = 'Произошла ошибка при загрузке изображений';
+    }
+    };
+        xhr.onerror = function() {
+        messageElement.textContent = 'Произошла ошибка при выполнении запроса';
+    };
+        xhr.send();
+    }
+    });
+    </script>
+
+</body>
+</html>
